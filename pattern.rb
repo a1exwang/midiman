@@ -39,21 +39,21 @@ module Musel
       end
     end
 
-    def self.pachelbel_canon(midi, scale)
+    def self.pachelbel_canon(midi, scale, count = 2)
       arr = [
           Musel::ChordHarmonics.new(3, "c#{scale}".to_sym, :quarter, 2),
           Musel::ChordHarmonics.new(3, "g#{scale-1}".to_sym, :quarter, 2),
-          Musel::ChordHarmonics.new(3, "a#{scale}".to_sym, :quarter, 0),
+          Musel::ChordHarmonics.new(3, "a#{scale-1}".to_sym, :quarter, 2),
           Musel::ChordHarmonics.new(3, "e#{scale}".to_sym, :quarter, 0),
           Musel::ChordHarmonics.new(3, "f#{scale}".to_sym, :quarter, 0),
-          Musel::ChordHarmonics.new(3, "c#{scale}".to_sym, :quarter, 2),
+          Musel::ChordHarmonics.new(3, "c#{scale}".to_sym, :quarter, 1),
           Musel::ChordHarmonics.new(3, "f#{scale}".to_sym, :quarter, 0),
           Musel::ChordHarmonics.new(3, "g#{scale}".to_sym, :quarter, 0)
       ]
       puts "pachelbel canon, scale: #{scale}"
       puts (arr.map { |x| x.to_s }).join("\n")
       arr.each do |h|
-        2.times { midi.append_harm(h) }
+        count.times { midi.append_harm(h) }
       end
     end
 

@@ -4,7 +4,7 @@ require_relative 'midi'
 require_relative 'pattern'
 include Musel
 
-midi = Midi.new('Alex MIDI', 60, Musel::Midi::Instruments::ACOUSTIC_PIANO)
+midi = Midi.new('Alex MIDI', 45, Musel::Midi::Instruments::ACOUSTIC_PIANO)
 
 # 1645
 # Musel::Pattern.harm_1645(midi, 3)
@@ -12,8 +12,8 @@ midi = Midi.new('Alex MIDI', 60, Musel::Midi::Instruments::ACOUSTIC_PIANO)
 # Musel::Pattern.harm_1645(midi, 3)
 # Musel::Pattern.harm_1645(midi, 3)
 
-Musel::Pattern.pachelbel_canon(midi, 3)
-Musel::Pattern.pachelbel_canon(midi, 3)
+Musel::Pattern.pachelbel_canon(midi, 3, 1)
+Musel::Pattern.pachelbel_canon(midi, 3, 1)
 # scale 3
 # (1..7).each do |i|
 #   2.times { append_triad(track, ('cdefgab'[i-1] + '3').to_sym, quarter_note_length) }
