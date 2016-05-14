@@ -2,7 +2,7 @@
 module Musel
 
   N_ARR = [0, 2, 4, 5, 7, 9, 11]
-  HALVES_PER_SCALE = 12
+  HALF_NOTES_PER_SCALE = 12
 
   class NotePitch
     attr_reader :note, :scale, :sharp_b
@@ -19,8 +19,8 @@ module Musel
       if args.size == 1
         if args.first.is_a? Numeric
           @midi = args.first
-          @scale = @midi / HALVES_PER_SCALE - 1
-          @note = @midi % HALVES_PER_SCALE
+          @scale = @midi / HALF_NOTES_PER_SCALE - 1
+          @note = @midi % HALF_NOTES_PER_SCALE
           @sharp_b = 0
           unless N_ARR.index(@note)
             @note -= 1
@@ -39,7 +39,7 @@ module Musel
             @sharp_b = 0
           end
           @note = N_ARR[c]
-          @midi = HALVES_PER_SCALE * (self.scale + 1) + N_ARR[c] + self.sharp_b
+          @midi = HALF_NOTES_PER_SCALE * (self.scale + 1) + N_ARR[c] + self.sharp_b
         end
       elsif args.size == 4
         @note, @scale, @sharp_b, @midi = args
@@ -49,8 +49,8 @@ module Musel
     end
 
     def self.from_midi(midi_n)
-      scale = midi_n / HALVES_PER_SCALE - 1
-      note = midi_n % HALVES_PER_SCALE
+      scale = midi_n / HALF_NOTES_PER_SCALE - 1
+      note = midi_n % HALF_NOTES_PER_SCALE
       sharp_b = 0
       unless N_ARR.index(note)
         note -= 1
@@ -81,7 +81,7 @@ module Musel
     end
 
     def scale_up
-      NotePitch.from_midi(self.midi + HALVES_PER_SCALE)
+      NotePitch.from_midi(self.midi + HALF_NOTES_PER_SCALE)
     end
 
     def to_s
@@ -164,14 +164,14 @@ module Musel
       if type == :white
         chord_counts.times do |i|
           @notes << Note.new(
-              root.next_white(2 * i).midi + ((0...inversion).include?(i) ? HALVES_PER_SCALE : 0),
+              root.next_white(2 * i).midi + ((0...inversion).include?(i) ? HALF_NOTES_PER_SCALE : 0),
               length,
               strength)
         end
       else
         chord_counts.times do |i|
           @notes << Note.new(
-              root.midi + CHORD_TABLE[n][type][i] + ((0...inversion).include?(i) ? HALVES_PER_SCALE : 0),
+              root.midi + CHORD_TABLE[n][type][i] + ((0...inversion).include?(i) ? HALF_NOTES_PER_SCALE : 0),
               length,
               strength)
         end

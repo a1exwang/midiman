@@ -3,11 +3,7 @@ require_relative 'midi'
 
 module Musel
   module Pattern
-
-    #
-    #1、C—Am—F—G 蔡琴—恰似你的温柔
     #2、C—G—Am—F Beyond—海阔天空 主歌
-    #3、C—F—G—C 李健—传奇 主歌
     #4、C—G—Am—G
     #5、C—G—F—G eric clapton—wonderful tonight
     #6、C—G—F—C Coldplay—Swallowed In The Sea
@@ -24,8 +20,8 @@ module Musel
     #Am—G—F—G（参考曲目：扭曲的机器—三十  主歌）
     #Am—G—C—Am（参考曲目：较少，暂时没想到）
 
-    # C G Am Em F C F G
-    # 1 5 6  3  4 1 4 5
+    # C Am F G
+    # 1645
     def self.harm_1645(midi, scale)
       arr = [
           Musel::ChordHarmonics.new(3, "c#{scale}".to_sym, :quarter, 2),
@@ -39,18 +35,52 @@ module Musel
       end
     end
 
+    # C F G C
+    # 1451
+    def self.harm_1451(midi, scale, count = 2)
+      arr = [
+          Musel::ChordHarmonics.new(3, "c#{scale}".to_sym, :quarter),
+          Musel::ChordHarmonics.new(3, "f#{scale-1}".to_sym, :quarter, 2),
+          Musel::ChordHarmonics.new(3, "g#{scale}".to_sym, :quarter, 0),
+          Musel::ChordHarmonics.new(3, "c#{scale-1}".to_sym, :quarter, 2)
+      ]
+      arr.each do |h|
+        count.times { midi.append_harm(h) }
+      end
+    end
+
+    # C G Am Em F C F G
+    # 1 5 6  3  4 1 4 5
     def self.pachelbel_canon(midi, scale, count = 2)
       arr = [
           Musel::ChordHarmonics.new(3, "c#{scale}".to_sym, :quarter, 2),
           Musel::ChordHarmonics.new(3, "g#{scale-1}".to_sym, :quarter, 2),
           Musel::ChordHarmonics.new(3, "a#{scale-1}".to_sym, :quarter, 2),
           Musel::ChordHarmonics.new(3, "e#{scale}".to_sym, :quarter, 0),
-          Musel::ChordHarmonics.new(3, "f#{scale}".to_sym, :quarter, 0),
-          Musel::ChordHarmonics.new(3, "c#{scale}".to_sym, :quarter, 1),
-          Musel::ChordHarmonics.new(3, "f#{scale}".to_sym, :quarter, 0),
-          Musel::ChordHarmonics.new(3, "g#{scale}".to_sym, :quarter, 0)
+          Musel::ChordHarmonics.new(3, "f#{scale-1}".to_sym, :quarter, 2),
+          Musel::ChordHarmonics.new(3, "c#{scale}".to_sym, :quarter, 0),
+          Musel::ChordHarmonics.new(3, "f#{scale-1}".to_sym, :quarter, 2),
+          Musel::ChordHarmonics.new(3, "g#{scale-1}".to_sym, :quarter, 2)
       ]
       puts "pachelbel canon, scale: #{scale}"
+      puts (arr.map { |x| x.to_s }).join("\n")
+      arr.each do |h|
+        count.times { midi.append_harm(h) }
+      end
+    end
+
+    def self.leading_bass(midi, scale, count = 1)
+      arr = [
+          Musel::ChordHarmonics.new(3, "c#{scale}".to_sym, :quarter, 2),
+          Musel::ChordHarmonics.new(3, "b#{scale-1}".to_sym, :quarter, 2),
+          Musel::ChordHarmonics.new(3, "a#{scale-1}".to_sym, :quarter, 2),
+          Musel::ChordHarmonics.new(3, "g#{scale}".to_sym, :quarter, 0),
+          Musel::ChordHarmonics.new(3, "f#{scale-1}".to_sym, :quarter, 2),
+          Musel::ChordHarmonics.new(3, "e#{scale}".to_sym, :quarter, 0),
+          Musel::ChordHarmonics.new(3, "f#{scale-1}".to_sym, :quarter, 2),
+          Musel::ChordHarmonics.new(3, "d#{scale-1}".to_sym, :quarter, 2)
+      ]
+      puts "leading bass, scale: #{scale}"
       puts (arr.map { |x| x.to_s }).join("\n")
       arr.each do |h|
         count.times { midi.append_harm(h) }
