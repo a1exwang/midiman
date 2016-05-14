@@ -1,4 +1,5 @@
 require 'midilib'
+require 'pp'
 
 module Musel
   class Midi
@@ -18,45 +19,64 @@ module Musel
 
     def initialize(name, bpm, instrument)
       @seq = MIDI::Sequence.new
-      tempo_track = Track.new(@seq)
+      tempo_track = MIDI::Track.new(@seq)
       @seq.tracks << tempo_track
-      tempo_track.events << Tempo.new(Tempo.bpm_to_mpq(bpm), 0)
-      tempo_track.events << MetaEvent.new(META_SEQ_NAME, name)
+      tempo_track.events << MIDI::Tempo.new(MIDI::Tempo.bpm_to_mpq(bpm), 0)
+      tempo_track.events << MIDI::MetaEvent.new(MIDI::META_SEQ_NAME, name)
 
-      @main_track = Track.new(@seq)
-      seq.tracks << @main_track
+      @main_track = MIDI::Track.new(@seq)
+      @seq.tracks << @main_track
       @main_track.name = 'Main'
 
-      @main_track.events << ProgramChange.new(0, 1, 0)
+      @main_track.events << MIDI::ProgramChange.new(0, 1, 0)
       @main_track.instrument = instrument
 
       @start_time = 0
     end
 
     def insert_note(pitch, start_time, length, strength = 127)
-      on = NoteOn.new(0, pitch, strength, 0)
+      on = MIDI::NoteOn.new(0, pitch, strength, 0)
       on.time_from_start = start_time
-      off = NoteOff.new(0, pitch, strength, length)
+      off = MIDI::NoteOff.new(0, pitch, strength, length)
       off.time_from_start = start_time + length
       @main_track.events << on << off
     end
 
     def append_note(pitch, length, strength = 127)
-      on = NoteOn.new(0, pitch, strength, 0)
+      on = MIDI::NoteOn.new(0, pitch, strength, 0)
       on.time_from_start = @start_time
-      off = NoteOff.new(0, pitch, strength, length)
+      off = MIDI::NoteOff.new(0, pitch, strength, length)
       off.time_from_start = @start_time + length
       @main_track.events << on << off
+      @start_time += length
     end
 
     def append_harmonics(pitches, length, strength = 127)
       pitches.each do |pitch|
-        on = NoteOn.new(0, pitch, strength, 0)
+        on = MIDI::NoteOn.new(0, pitch, strength, 0)
         on.time_from_start = @start_time
-        off = NoteOff.new(0, pitch, strength, length)
+        off = MIDI::NoteOff.new(0, pitch, strength, length)
         off.time_from_start = @start_time + length
         @main_track.events << on << off
       end
+      @start_time += length
+    end
+
+    def append_harm(harm)
+      duration = 0
+      harm.notes.each do |note|
+        duration = note_to_delta(note.duration.name)
+        on = MIDI::NoteOn.new(0, note.pitch.midi, note.strength, 0)
+        on.time_from_start = @start_time
+        off = MIDI::NoteOff.new(0, note.pitch.midi, note.strength, duration)
+        off.time_from_start = @start_time + duration
+        @main_track.events << on << off
+      end
+      @start_time += duration
+    end
+
+    def note_to_delta(name)
+      @seq.note_to_delta(name)
     end
 
     def save_to(file_name)
