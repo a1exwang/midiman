@@ -58,7 +58,7 @@ module Musel
           Musel::ChordHarmonics.new(3, "a#{scale-1}".to_sym, :quarter, 2),
           Musel::ChordHarmonics.new(3, "e#{scale}".to_sym, :quarter, 0),
           Musel::ChordHarmonics.new(3, "f#{scale-1}".to_sym, :quarter, 2),
-          Musel::ChordHarmonics.new(3, "c#{scale}".to_sym, :quarter, 0),
+          Musel::ChordHarmonics.new(3, "c#{scale-1}".to_sym, :quarter, 2),
           Musel::ChordHarmonics.new(3, "f#{scale-1}".to_sym, :quarter, 2),
           Musel::ChordHarmonics.new(3, "g#{scale-1}".to_sym, :quarter, 2)
       ]

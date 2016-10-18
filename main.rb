@@ -15,8 +15,8 @@ midi = Midi.new('Alex MIDI', 45, Musel::Midi::Instruments::ACOUSTIC_PIANO)
 
 #Musel::Pattern.harm_1451(midi, 4, 1)
 # Musel::Pattern.pachelbel_canon(midi, 3, 1)
-# Musel::Pattern.pachelbel_canon(midi, 4, 1)
-Musel::Pattern.leading_bass(midi, 4, 1)
+Musel::Pattern.pachelbel_canon(midi, 3, 1)
+#Musel::Pattern.leading_bass(midi, 4, 1)
 
 # scale 3
 # (1..7).each do |i|
@@ -33,6 +33,8 @@ Musel::Pattern.leading_bass(midi, 4, 1)
 # @chord_table[7].keys.each do |key|
 #   2.times { chord_n(midi, 7, :g3, quarter_note_length, 0, key) }
 # end
+
+# midi.append_note(64, 1000)
 
 midi.save_to('my_output_file.mid')
 
