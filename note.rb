@@ -92,7 +92,7 @@ module Musel
   end
 
   class NoteDuration
-    attr_reader :name
+    attr_reader :beats
     ##
     # def initialize(name = :quarter)
     #   name = string or symbol
@@ -110,11 +110,10 @@ module Musel
     #     'sixtyfourth'
     #     '64th'
     # }
-    # def initialize(millis)
-    def initialize(name)
-      @name = name.to_s
+    # def initialize(beats)
+    def initialize(beats)
+      @beats = beats
     end
-
   end
 
   class Note
@@ -152,7 +151,7 @@ module Musel
   class ChordHarmonics
     attr_reader :notes
     ##
-    # def initialize(chord_name_n, root_note_name, inversion, length, strength, type)
+    # def initialize(chord_name_n, root_note_name, length, inversion, strength, type)
     #   type =
     #       :white, use white keys to play the harmonics
     #       for triads, :major, :minor, :aug, :dim
