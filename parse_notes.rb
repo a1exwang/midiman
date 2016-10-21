@@ -15,7 +15,7 @@ module Musel
     end
 
     def midi_val_to_name(val, sharp = true)
-      h = val / 12 - 1
+      h = val.round / 12 - 1
       note = val % 12
       sharp ?
           [%w'C C# D D# E F F# G G# A A# B'[note], h] :
@@ -37,10 +37,16 @@ module Musel
       end
     end
 
+    def parse_raw_freqs(na, sample_rate, window_duration,
+                        windowing_function = DEFAULT_WINDOWING_FUNCTION)
+        fc = FFTW3.fft(windowing_function.call(na, sample_rate, window_duration)) / na.length
+        base_freq = 1.0 / window_duration
+        [base_freq, fc]
+      end
+
     def parse_notes(na, sample_rate, window_duration,
             white_noise, windowing_function = DEFAULT_WINDOWING_FUNCTION)
-      fc = FFTW3.fft(windowing_function.call(na, sample_rate, window_duration)) / na.length
-      base_freq = 1.0 / window_duration
+      base_freq, fc = parse_raw_freqs(na, sample_rate, window_duration, windowing_function)
       sample_count = (sample_rate * window_duration)
       freq_spectrum = Hash.new(0)
       (1...(sample_count / 2)).each do |i|
@@ -50,7 +56,7 @@ module Musel
         v = 0 if v < white_noise
         midi = freq_to_midi(freq)
         if midi > 28 && midi < 105
-          freq_spectrum[midi.round] += v
+            freq_spectrum[midi.round] += v
         end
       end
       freq_spectrum
@@ -75,7 +81,16 @@ module Musel
     # na = sine_narray(sample_rate, total_time, f1, f2)
     # # parse_notes(na, na.size, total_time, 1, 0)
 
-    def parse_file(file_path)
+    ##
+    # Read from a *.wav file and parse notes from it.
+    # @param file_path: The wave file path
+    # @param output_format: :raw | :midi | :pretty
+    #   :raw, returns a hash of frequency f, 2f, 3f, ...
+    #   :midi, returns a hash of frequency f, 2f, 4f, ... in midi scales
+    #   :pretty, returns a hash of C3, A3, ... in music notes
+    # @start_time: in seconds
+    # @end_time: in seconds, nil for end of file
+    def parse_file(file_path, output_format, window_duration, window_interval, start_time = 0, end_time = nil)
       # First, get sample rate and sample bit width
       reader = WaveFile::Reader.new(file_path)
       format = reader.format
@@ -95,40 +110,59 @@ module Musel
       puts "Max value #{sample_max_value}"
       puts "Samples per second = #{sample_rate}"
 
+      window_sample_count = (window_duration * sample_rate).round
       # Calculate window sample count
-      bpm = 60
-      beats_per_second = bpm / 60.0
-      beats_per_window = 1.0 / 8
-      window_sample_count = (beats_per_window / beats_per_second * sample_rate).floor
-      window_duration = window_sample_count.to_f / sample_rate
-      puts "Samples in a window = #{window_sample_count}"
-      puts "Window duration = #{window_duration.round(3)}s"
+      # bpm = 60
+      # beats_per_second = bpm / 60.0
+      # beats_per_window = 1.0 / 8
+      # window_sample_count = (beats_per_window / beats_per_second * sample_rate).floor
+      # window_duration = window_sample_count.to_f / sample_rate
+      # puts "Samples in a window = #{window_sample_count}"
+      # puts "Window duration = #{window_duration.round(3)}s"
 
       # Calculate window interval
-      sample_interval = window_sample_count / sample_rate.to_f / 2
-      puts "Interval between windows = #{sample_interval.round(3)}s"
+      # sample_interval = window_duration
+      # puts "Interval between windows = #{sample_interval.round(3)}s"
 
       freq_arr = []
 
       t = 0.0
       loop do
+        break if end_time && t > end_time
+
         window_start_index = (t * sample_rate).to_i
         break if window_start_index + window_sample_count >= samples.size
 
+        # Create sample values in a period of time.
         na = NArray.float(window_sample_count, 1)
         samples[window_start_index, window_sample_count].each_with_index do |v, j|
           l, r = v
-          na[j, 0] = (l+r)/2
+          # Normalize values to 1
+          na[j, 0] = (l+r)/2 / sample_max_value
         end
-        puts "Parsing notes: #{t.round(2)}s ~ #{(t+sample_interval).round(2)}s"
-        pts = parse_notes(na, sample_rate, window_duration, 0.00001, make_gauss_windowing_function(0.25))
-        predict_notes = pts.reject { |_, val| val <= 1000 }.sort_by { |_, val| -val }
-        pp predict_notes
-        freq_arr << pts
-        t += sample_interval
+        puts "Parsing notes: #{t.round(2)}s ~ #{(t+window_interval).round(2)}s"
+
+        if output_format == :raw
+          freq_spectrum = parse_raw_freqs(na, sample_rate, window_duration, make_gauss_windowing_function(0.25))
+          freq_arr << freq_spectrum
+        else
+          pts = parse_notes(na, sample_rate, window_duration, 0.00001, make_gauss_windowing_function(0.1))
+          predict_notes = pts.reject { |_, val| val <= 0.01 }.sort_by { |_, val| -val }.first(3)
+          if output_format == :midi
+            freq_arr << pts
+          else # output_format == :pretty
+            freq_arr << predict_notes.map { |midi, val| [midi_val_to_name(midi).join, val] }
+          end
+        end
+        t +=  window_interval
       end
 
-      [freq_arr, sample_interval]
+      {
+          data: freq_arr,
+          base_freq: 1.0 / window_duration,
+          sample_rate: sample_rate,
+          window_sample_count: window_sample_count,
+      }
     end
   end
 end

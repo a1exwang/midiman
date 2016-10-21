@@ -41,7 +41,7 @@ RSpec.describe Musel::AudioParser do
     na_10sin_3sin = sine_narray(sample_count, t, freq1, freq2, 10, 3)
 
     white_noise = 0.01
-    notes = parse_notes(na_10sin_3sin, sample_rate, t, white_noise, make_gauss_windowing_function(0.25))
+    notes = parse_notes(na_10sin_3sin, sample_rate, t, white_noise, make_gauss_windowing_function(0.1))
     predict_notes = notes.reject { |_, val| val <= 0 }.sort_by { |_, val| -val }
 
     expect(predict_notes[0].first).to eq(69)
@@ -49,8 +49,18 @@ RSpec.describe Musel::AudioParser do
   end
 
   it 'should parse wave file of one onte' do
-    result = parse_file('test/append-note.wav')
-    # pp result
+    window_duration = 1/2.0
+    window_interval = 1/8.0
+    result = parse_file('test/append-note.wav', :pretty, window_duration, window_interval)
+    puts "Base frequency = #{result[:base_freq].round(3)}Hz"
+    puts "Sample rate = #{result[:sample_rate]}Hz"
+    puts "Window duration = #{window_duration.round(3)}s"
+    puts "Window sample interval = #{window_interval.round(3)}s"
+    result[:data].each do |spectrum|
+      if spectrum.size > 0
+        puts spectrum.map { |note, val| note }.join(' ')
+      end
+    end
   end
 
 end

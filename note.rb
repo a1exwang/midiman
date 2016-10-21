@@ -9,8 +9,9 @@ module Musel
     attr_reader :midi
 
     ##
-    # def initialize(name = :g0)
-    # def initialize(note, scale, sharp_b, midi)
+    # NotePitch.new(:g0)
+    # NotePitch.new(60)
+    # NotePitch.new(note, scale, sharp_b, midi)
     def initialize(*args)
       if args.size <= 0
         args = [:g0]

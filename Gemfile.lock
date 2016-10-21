@@ -18,6 +18,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.4.0)
     rspec-support (3.4.1)
+    ruby-prof (0.15.9)
     wavefile (0.7.0)
 
 PLATFORMS
@@ -28,6 +29,7 @@ DEPENDENCIES
   midilib
   narray
   rspec
+  ruby-prof
   wavefile
 
 BUNDLED WITH
